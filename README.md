@@ -11,7 +11,7 @@
 1. Korzystając z Python Package Index:
 
 ```bash
-$ pip install logingovpl
+$ pip install git+https://github.com/RafalGandecki/django-logingovpl
 ```
 
 2. Dodaj `logingovpl` do `INSTALLED_APPS`:
