@@ -32,15 +32,15 @@ def get_status_code(content):
     return status_code
 
 
-def get_status_code(content):
+def get_logout_status_code(content):
     tree = fromstring(content)
     try:
         elem_attrib = tree.find(
-            './/{urn:oasis:names:tc:SAML:2.0:protocol}Response/{urn:oasis:names:tc:SAML:2.0:protocol}Status/{urn:oasis:names:tc:SAML:2.0:protocol}StatusCode/{urn:oasis:names:tc:SAML:2.0:protocol}StatusCode',
+            './/{urn:oasis:names:tc:SAML:2.0:protocol}LogoutResponse/{urn:oasis:names:tc:SAML:2.0:protocol}Status/{urn:oasis:names:tc:SAML:2.0:protocol}StatusCode/{urn:oasis:names:tc:SAML:2.0:protocol}StatusCode',
         ).attrib
     except AttributeError:
         elem_attrib = tree.find(
-            './/{urn:oasis:names:tc:SAML:2.0:protocol}Response/{urn:oasis:names:tc:SAML:2.0:protocol}Status/{urn:oasis:names:tc:SAML:2.0:protocol}StatusCode',
+            './/{urn:oasis:names:tc:SAML:2.0:protocol}LogoutResponse/{urn:oasis:names:tc:SAML:2.0:protocol}Status/{urn:oasis:names:tc:SAML:2.0:protocol}StatusCode',
         ).attrib
     finally:
         status_code = elem_attrib.get('Value')
