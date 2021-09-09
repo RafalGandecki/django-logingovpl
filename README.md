@@ -46,6 +46,7 @@ Adres dostawcy tożsamości (domyślnie adres symulatora):
 ```python
 LOGINGOVPL_ARTIFACT_RESOLVE_URL = "https://symulator.login.gov.pl/login-services/idpArtifactResolutionService"
 LOGINGOVPL_SSO_URL = "https://symulator.login.gov.pl/login/SingleSignOnService"
+LOGINGOVPL_SLO_URL = "https://symulator.login.gov.pl/login-services/singleLogoutService"
 ```
 
 Adres po stronie dostawcy usługi na który wysyłana jest asercja:

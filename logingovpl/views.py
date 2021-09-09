@@ -114,3 +114,41 @@ class ACSView(ACSMixin, FormView):
 
     def form_invalid(self, form):
         logger.error('Invalid response from IDP %s', form.errors)  # noqa
+
+class SLOView(TemplateView):
+    """Single logout view.
+
+    Returns:
+        TODO
+    """
+
+    http_method_names = ['post']
+
+    def get_authn_request_id(self):
+        authn_request_id = 'ID-{}'.format(uuid.uuid4())
+        logger.debug('auth_request: %s', authn_request_id)
+        return authn_request_id
+
+    def get_logout_request(self, session_index, name_id):
+        xml = render_to_string(
+            'LogoutRequest.xml',
+            {
+                'authn_request_id': self.get_authn_request_id(),
+                'authn_request_issue_instant': get_issue_instant(),
+                'issuer': settings.LOGINGOVPL_ISSUER,
+                'slo_url': settings.LOGINGOVPL_SLO_URL,
+                'session_index': session_index,
+                'name_id': name_id
+            },
+        )
+
+        return add_sign(
+            xml, settings.LOGINGOVPL_ENC_KEY, settings.LOGINGOVPL_ENC_CERT,
+        )
+
+    def get_context_data(self, **kwargs):
+        session_index = kwargs["session_index"]
+        name_id = kwargs["name_id"]
+        signed = self.get_logout_request(session_index, name_id)
+        print(signed)
+        return {}
