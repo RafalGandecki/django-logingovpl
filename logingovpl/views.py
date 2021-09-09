@@ -1,21 +1,23 @@
 import base64
 import logging
 import uuid
+import requests
 
 from django.conf import settings
 from django.contrib.auth import get_user_model, login
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, View
 
 from .forms import ACSForm
 from .services import add_sign, decode_cipher_value
 from .mixins import ACSMixin
 from .statuses import SUCCESS
 from .utils import (
+    get_logout_status_code,
     get_in_response_to,
     get_issue_instant,
     get_relay_state,
@@ -58,6 +60,7 @@ class SSOView(TemplateView):
         )
 
     def get_context_data(self, **kwargs):
+        print("SADSADSA")
         relay_state = get_relay_state()
         signed = self.get_signed_authn_request()
 
@@ -115,14 +118,18 @@ class ACSView(ACSMixin, FormView):
     def form_invalid(self, form):
         logger.error('Invalid response from IDP %s', form.errors)  # noqa
 
-class SLOView(TemplateView):
+class SLOView(View):
     """Single logout view.
 
-    Returns:
-        TODO
+        Args:
+            session_index (str)
+            name_index (str)
+
+        Returns:
+            JsonResponse: status_code
     """
 
-    http_method_names = ['post']
+    http_method_names = ['get']
 
     def get_authn_request_id(self):
         authn_request_id = 'ID-{}'.format(uuid.uuid4())
@@ -146,9 +153,10 @@ class SLOView(TemplateView):
             xml, settings.LOGINGOVPL_ENC_KEY, settings.LOGINGOVPL_ENC_CERT,
         )
 
-    def get_context_data(self, **kwargs):
+    def get(self, request, *args, **kwargs):
         session_index = kwargs["session_index"]
         name_id = kwargs["name_id"]
         signed = self.get_logout_request(session_index, name_id)
-        print(signed)
-        return {}
+        r = requests.post(settings.LOGINGOVPL_SLO_URL, data=signed)
+        status = get_logout_status_code(str(r.text))
+        return JsonResponse({"status_code": r.status_code, "status_message": status})
